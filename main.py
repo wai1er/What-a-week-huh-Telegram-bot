@@ -37,7 +37,7 @@ def handle_start_command(message):
 
     if user_id not in chat_id_int:
         CURSOR.execute(
-            f"INSERT INTO users VALUES('{user_name}', {user_id}, {0})")
+            f"INSERT INTO users VALUES (?, ?, ?);", (user_name, user_id, 0))
         DB.commit()
         BOT.send_message(user_id, f"Hello, captain {user_name}...")
         logger.info(
@@ -72,7 +72,7 @@ def handle_text_message(message):
     user_name, user_id, text = message.chat.username, message.chat.id, message.text
 
     CURSOR.execute(
-        f"SELECT amount_of_text_messages FROM users WHERE chat_id = {user_id}")
+        f"SELECT amount_of_text_messages FROM users WHERE chat_id = ?", (user_id))
 
     amount_of_text_messages_from_user = CURSOR.fetchone()[0]
 
@@ -84,11 +84,11 @@ def handle_text_message(message):
         BOT.send_message(
             user_id, "No, captain... No need to write me anything.")
         CURSOR.execute(
-            f"UPDATE users SET amount_of_text_messages = {amount_of_text_messages_from_user + 1} WHERE chat_id = {user_id}")
+            f"UPDATE users SET amount_of_text_messages = {amount_of_text_messages_from_user + 1} WHERE chat_id = ?", (user_id))
         DB.commit()
     else:
         CURSOR.execute(
-            f"UPDATE users SET amount_of_text_messages = 0 WHERE chat_id = {user_id}")
+            f"UPDATE users SET amount_of_text_messages = 0 WHERE chat_id = ?", (user_id))
         DB.commit()
         BOT.send_message(user_id, "Ok, i got ya.")
         BOT.send_sticker(user_id, get_random_sticker())
@@ -123,7 +123,7 @@ def get_unique_image(unique_day):
 def start_mailing():
     now = datetime.now()
     current_day, current_weekday, current_month = now.day, now.weekday(), now.month
-    target_hour = randint(0, 1)
+    target_hour = randint(13, 22)
     target_minutes = randint(0, len(MINUTES)-1)
     target_seconds = target_hour * 3600 + target_minutes * 60
     current_seconds = now.hour * 3600 + now.minute * 60 + now.second
