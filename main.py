@@ -36,17 +36,19 @@ def handle_start_command(message):
     chat_id_int = [chat_id[0] for chat_id in chat_id_tuples]
 
     if user_id not in chat_id_int:
-        CURSOR.execute(
-            f"INSERT INTO users VALUES (?, ?, ?);", (user_name, user_id, 0))
-        DB.commit()
-        BOT.send_message(user_id, f"Hello, captain {user_name}...")
-        logger.info(
-            f"New registered user: {user_name}, chat_id - {user_id}")
+        if user_name != None:
+            CURSOR.execute(f"INSERT INTO users VALUES('{user_name}', {user_id}, {0})")
+            DB.commit()
+            BOT.send_message(user_id, f"Hello, captain {user_name}...")
+            logger.info(f"New registered user: {user_name}, chat_id - {user_id}")
+        else:
+            CURSOR.execute(f"INSERT INTO users VALUES('{user_id}', {user_id}, {0})")
+            DB.commit()
+            BOT.send_message(user_id, f"Hello, stranger {point_right}{point_left}...")
+            logger.info(f"New registered user: {user_id}, chat_id - {user_id}")
     else:
         BOT.send_message(user_id, "Already registered")
-        logger.info(
-            f"Already registered user: {user_name}, chat_id - {user_id}")
-
+        logger.info(f"Already registered user: {user_name}, chat_id - {user_id}")
 
 @BOT.message_handler(commands=["status"])
 def handle_status_command(message):
