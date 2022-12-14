@@ -11,6 +11,7 @@ import logging
 BOT = telebot.TeleBot(TOKEN)
 DB = sqlite3.connect('users.db', check_same_thread=False)
 CURSOR = DB.cursor()
+TARGET_SECONDS = 0
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
@@ -50,6 +51,7 @@ def handle_start_command(message):
         BOT.send_message(user_id, "Already registered")
         logger.info(f"Already registered user: {user_name}, chat_id - {user_id}")
 
+
 @BOT.message_handler(commands=["status"])
 def handle_status_command(message):
     user_id = message.chat.id
@@ -67,6 +69,13 @@ def handle_status_command(message):
             for row in (f.readlines()[-30:]):
                 logs += row + '\n'
         BOT.send_message(ADMIN_CHAT_ID, logs)
+
+
+@BOT.message_handler(commands=["when"])
+def handle_when_command(message):
+    user_id = message.chat.id
+    msg = time_till_meme()
+    BOT.send_message(user_id, msg)
 
 
 @BOT.message_handler(content_types=['text'])
@@ -96,6 +105,29 @@ def handle_text_message(message):
         BOT.send_sticker(user_id, get_random_sticker())
 
 
+def time_till_meme():
+    global TARGET_SECONDS
+    now = datetime.now()
+    current_seconds = now.hour * 3600 + now.minute * 60 + now.second
+
+    if current_seconds < TARGET_SECONDS:
+        current_waiting_time = TARGET_SECONDS - current_seconds
+    else:
+        current_waiting_time = DAY_SECONDS - (current_seconds - TARGET_SECONDS)
+
+    seconds = current_waiting_time % (24 * 3600)
+    hours = time_formatter(seconds // 3600)
+    seconds %= 3600
+    minutes = time_formatter(seconds // 60)
+    seconds = time_formatter(seconds % 60)
+    return (f'I\'ll send u next meme in {hours}:{minutes}:{seconds}.')
+
+def time_formatter(time):
+    if time < 10:
+        return '0' + str(time)
+    else:
+        return time
+
 def get_random_image(day="wednesday"):
     path = f'images/{day}'
     images = []
@@ -123,17 +155,18 @@ def get_unique_image(unique_day):
 
 
 def start_mailing():
+    global TARGET_SECONDS
     now = datetime.now()
     current_day, current_weekday, current_month = now.day, now.weekday(), now.month
     target_hour = randint(13, 22)
     target_minutes = randint(0, len(MINUTES)-1)
-    target_seconds = target_hour * 3600 + target_minutes * 60
+    TARGET_SECONDS = target_hour * 3600 + target_minutes * 60
     current_seconds = now.hour * 3600 + now.minute * 60 + now.second
 
-    if current_seconds < target_seconds:
-        waiting_time = target_seconds - current_seconds
+    if current_seconds < TARGET_SECONDS:
+        waiting_time = TARGET_SECONDS - current_seconds
     else:
-        waiting_time = DAY_SECONDS - (current_seconds - target_seconds)
+        waiting_time = DAY_SECONDS - (current_seconds - TARGET_SECONDS)
 
     logger.info(f"Waiting time is: {waiting_time}")
     time.sleep(waiting_time)
