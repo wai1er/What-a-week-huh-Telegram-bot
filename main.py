@@ -72,7 +72,7 @@ def handle_text_message(message):
     user_name, user_id, text = message.chat.username, message.chat.id, message.text
 
     CURSOR.execute(
-        f"SELECT amount_of_text_messages FROM users WHERE chat_id = ?", (user_id))
+        f"SELECT amount_of_text_messages FROM users WHERE chat_id = ?", (user_id,))
 
     amount_of_text_messages_from_user = CURSOR.fetchone()[0]
 
@@ -84,11 +84,11 @@ def handle_text_message(message):
         BOT.send_message(
             user_id, "No, captain... No need to write me anything.")
         CURSOR.execute(
-            f"UPDATE users SET amount_of_text_messages = {amount_of_text_messages_from_user + 1} WHERE chat_id = ?", (user_id))
+            f"UPDATE users SET amount_of_text_messages = {amount_of_text_messages_from_user + 1} WHERE chat_id = ?", (user_id,))
         DB.commit()
     else:
         CURSOR.execute(
-            f"UPDATE users SET amount_of_text_messages = 0 WHERE chat_id = ?", (user_id))
+            f"UPDATE users SET amount_of_text_messages = 0 WHERE chat_id = ?", (user_id,))
         DB.commit()
         BOT.send_message(user_id, "Ok, i got ya.")
         BOT.send_sticker(user_id, get_random_sticker())
