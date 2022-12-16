@@ -3,6 +3,7 @@ import time
 from datetime import datetime
 from random import randint
 import telebot
+from telebot.apihelper import ApiTelegramException
 import threading
 from constants import *
 import sqlite3
@@ -11,7 +12,6 @@ import logging
 BOT = telebot.TeleBot(TOKEN)
 DB = sqlite3.connect('users.db', check_same_thread=False)
 CURSOR = DB.cursor()
-TARGET_SECONDS = 0
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
@@ -205,10 +205,14 @@ def start_mailing():
                 image = open(get_random_image("other"), 'rb')
                 BOT.send_photo(user_id, image)
                 logger.info(f"Sent image to: {user_id}")
-        except Exception as e:
-            logger.info(f"Got unexpected {e} for user {user_id}")
-            users.insert(0, user_id)
-
+        except ApiTelegramException as e:
+            if e.error_code == BLOCKED_USER_ERROR_CODE:
+                CURSOR.execute(f"DELETE FROM users WHERE chat_id = ?", (user_id,))
+                DB.commit()
+                logger.info(
+                    f"User {user_id} blocked the bot and has been deleted from the database."
+                )
+            logger.info(f"Got unexpected {e} for user {user_id} skipping him")
     time.sleep(1)
 
 
