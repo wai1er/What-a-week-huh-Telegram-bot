@@ -45,7 +45,7 @@ def handle_start_command(message):
         else:
             CURSOR.execute(f"INSERT INTO users VALUES('{user_id}', {user_id}, {0})")
             DB.commit()
-            BOT.send_message(user_id, f"Hello, stranger {point_right}{point_left}...")
+            BOT.send_message(user_id, f"Hello, stranger {POINT_RIGHT}{POINT_LEFT}...")
             logger.info(f"New registered user: {user_id}, chat_id - {user_id}")
     else:
         BOT.send_message(user_id, "Already registered")
