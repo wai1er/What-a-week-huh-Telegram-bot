@@ -1,4 +1,4 @@
-# What a week huh? Telegram bot.
+# What a week, huh? Telegram bot.
 
 <p align="center">
       <img src="https://i.ibb.co/TKDgF58/cover5.jpg" alt = "Bot logo" width="300">
@@ -14,7 +14,7 @@ This bot is about to send u memes. Not more and not less. Maybe.
 
 ## Distribute
 
-- [What a week huh?](https://t.me/wawh_bot)
+- [What a week, huh?](https://t.me/wawh_bot)
 
 ## Developers
 
