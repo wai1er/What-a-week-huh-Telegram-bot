@@ -1,4 +1,3 @@
-import os
 import time
 from datetime import datetime
 from random import randint
@@ -8,15 +7,20 @@ import threading
 from constants import *
 import sqlite3
 import logging
+from utils import *
 
 BOT = telebot.TeleBot(TOKEN)
-DB = sqlite3.connect('users.db', check_same_thread=False)
+DB = sqlite3.connect("users.db", check_same_thread=False)
 CURSOR = DB.cursor()
+TARGET_SECONDS = 0
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
-logging.basicConfig(filename=LOG_PATH, level=logging.INFO,
-                    format=' %(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    filename=LOG_PATH,
+    level=logging.INFO,
+    format=" %(asctime)s - %(levelname)s - %(message)s",
+)
 
 """
 
@@ -56,50 +60,60 @@ def handle_start_command(message):
 def handle_status_command(message):
     user_id = message.chat.id
     if user_id != ADMIN_CHAT_ID:
-        BOT.send_message(
-            user_id, "No, captain. You've entered the wrong door.")
+        BOT.send_message(user_id, "No, captain. You've entered the wrong door.")
         BOT.send_sticker(
-            user_id, "CAACAgIAAxkBAAEG0c5jmRSpOJEV_p0KAAGAkuEQYoHmKMsAAqkWAAL5ugFI51be3L04vBAsBA")
+            user_id,
+            "CAACAgIAAxkBAAEG0c5jmRSpOJEV_p0KAAGAkuEQYoHmKMsAAqkWAAL5ugFI51be3L04vBAsBA",
+        )
         BOT.send_message(
-            ADMIN_CHAT_ID, f'User {user_id} has been trying to get the status!')
+            ADMIN_CHAT_ID, f"User {user_id} has been trying to get the status!"
+        )
     else:
 
         logs = ""
         with open(LOG_PATH) as f:
-            for row in (f.readlines()[-30:]):
-                logs += row + '\n'
-        BOT.send_message(ADMIN_CHAT_ID, logs)
+            for row in f.readlines()[-30:]:
+                logs += row + "\n"
+        BOT.send_message(user_id, logs)
 
 
 @BOT.message_handler(commands=["when"])
 def handle_when_command(message):
     user_id = message.chat.id
-    msg = time_till_meme()
-    BOT.send_message(user_id, msg)
+    if not time_till_meme():
+        msg = f"Wait for next day to get your meme"
+        BOT.send_message(user_id, msg)
+    else:
+        msg = f"I'll send you meme in {time_till_meme()}"
+        BOT.send_message(user_id, msg)
 
 
-@BOT.message_handler(content_types=['text'])
+@BOT.message_handler(content_types=["text"])
 def handle_text_message(message):
     user_name, user_id, text = message.chat.username, message.chat.id, message.text
 
     CURSOR.execute(
-        f"SELECT amount_of_text_messages FROM users WHERE chat_id = ?", (user_id,))
+        f"SELECT amount_of_text_messages FROM users WHERE chat_id = ?", (user_id,)
+    )
 
     amount_of_text_messages_from_user = CURSOR.fetchone()[0]
 
     if user_id != ADMIN_CHAT_ID:
-        msg = f'User {user_name}, {user_id}, {text}'
+        msg = f"User {user_name}, {user_id}, {text}"
         BOT.send_message(ADMIN_CHAT_ID, msg)
 
     if amount_of_text_messages_from_user < 2:
-        BOT.send_message(
-            user_id, "No, captain... No need to write me anything.")
+        BOT.send_message(user_id, "No, captain... No need to write me anything.")
         CURSOR.execute(
-            f"UPDATE users SET amount_of_text_messages = {amount_of_text_messages_from_user + 1} WHERE chat_id = ?", (user_id,))
+            f"UPDATE users SET amount_of_text_messages = {amount_of_text_messages_from_user + 1} WHERE chat_id = ?",
+            (user_id,),
+        )
         DB.commit()
     else:
         CURSOR.execute(
-            f"UPDATE users SET amount_of_text_messages = 0 WHERE chat_id = ?", (user_id,))
+            f"UPDATE users SET amount_of_text_messages = 0 WHERE chat_id = ?",
+            (user_id,),
+        )
         DB.commit()
         BOT.send_message(user_id, "Ok, i got ya.")
         BOT.send_sticker(user_id, get_random_sticker())
@@ -107,6 +121,10 @@ def handle_text_message(message):
 
 def time_till_meme():
     global TARGET_SECONDS
+
+    if TARGET_SECONDS == 0:
+        return 0
+
     now = datetime.now()
     current_seconds = now.hour * 3600 + now.minute * 60 + now.second
 
@@ -120,38 +138,7 @@ def time_till_meme():
     seconds %= 3600
     minutes = time_formatter(seconds // 60)
     seconds = time_formatter(seconds % 60)
-    return (f'I\'ll send u next meme in {hours}:{minutes}:{seconds}.')
-
-def time_formatter(time):
-    if time < 10:
-        return '0' + str(time)
-    else:
-        return time
-
-def get_random_image(day="wednesday"):
-    path = f'images/{day}'
-    images = []
-    for _, _, files in os.walk(path):
-        for filename in files:
-            images.append(filename)
-    select = randint(0, len(images)-1)
-    return (f'{path}/{images[select]}')
-
-
-def get_random_sticker():
-    select = randint(0, len(STICKER_IDS)-1)
-    return (STICKER_IDS[select])
-
-
-def get_unique_image(unique_day):
-    path = f'images/unique'
-    unique_day_types = {}
-    for _, _, files in os.walk(path):
-        for filename in files:
-            day_type = filename.rstrip('.jpg')
-            unique_day_types[day_type] = filename
-
-    return f'{path}/{unique_day_types[unique_day]}'
+    return f"{hours}:{minutes}:{seconds}."
 
 
 def start_mailing():
@@ -159,7 +146,7 @@ def start_mailing():
     now = datetime.now()
     current_day, current_weekday, current_month = now.day, now.weekday(), now.month
     target_hour = randint(13, 22)
-    target_minutes = randint(0, len(MINUTES)-1)
+    target_minutes = randint(0, len(MINUTES) - 1)
     TARGET_SECONDS = target_hour * 3600 + target_minutes * 60
     current_seconds = now.hour * 3600 + now.minute * 60 + now.second
 
@@ -168,7 +155,9 @@ def start_mailing():
     else:
         waiting_time = DAY_SECONDS - (current_seconds - TARGET_SECONDS)
 
-    logger.info(f"Waiting time is: {waiting_time}")
+    time_till_next_day = DAY_SECONDS - current_seconds - waiting_time
+
+    logger.info(f"Waiting time is: {time_till_meme()}, {waiting_time}")
     time.sleep(waiting_time)
     logger.info("Started mailing...")
 
@@ -180,29 +169,29 @@ def start_mailing():
         user_id = users.pop()
         try:
             if current_weekday == 2:
-                image = open(get_random_image(), 'rb')
+                image = open(get_random_image(), "rb")
                 BOT.send_photo(user_id, image)
                 logger.info(f"Sent image to: {user_id}")
             elif current_day == 15:
-                image = open(get_unique_image('every_fifteen'), 'rb')
+                image = open(get_unique_image("every_fifteen"), "rb")
                 BOT.send_photo(user_id, image)
                 logger.info(f"Sent image to: {user_id}")
             elif current_month == 2:
                 chance = randint(0, 100)
                 if chance < 5:
-                    image = open(get_unique_image('february'), 'rb')
+                    image = open(get_unique_image("february"), "rb")
                     BOT.send_photo(user_id, image)
                     logger.info(f"Sent image to: {user_id}")
             elif current_day == 2 and current_month == 1:
-                image = open(get_unique_image('january_second'), 'rb')
+                image = open(get_unique_image("january_second"), "rb")
                 BOT.send_photo(user_id, image)
                 logger.info(f"Sent image to: {user_id}")
-            elif current_day == 6:
-                image = open(get_unique_image('sunday'), 'rb')
+            elif current_weekday == 6:
+                image = open(get_unique_image("sunday"), "rb")
                 BOT.send_photo(user_id, image)
                 logger.info(f"Sent image to: {user_id}")
             else:
-                image = open(get_random_image("other"), 'rb')
+                image = open(get_random_image("other"), "rb")
                 BOT.send_photo(user_id, image)
                 logger.info(f"Sent image to: {user_id}")
         except ApiTelegramException as e:
@@ -213,7 +202,10 @@ def start_mailing():
                     f"User {user_id} blocked the bot and has been deleted from the database."
                 )
             logger.info(f"Got unexpected {e} for user {user_id} skipping him")
-    time.sleep(1)
+
+    TARGET_SECONDS = 0
+    logger.info(f"Waiting for next day to choose the time: {time_till_next_day}")
+    time.sleep(time_till_next_day)
 
 
 def mailing_daemon():
