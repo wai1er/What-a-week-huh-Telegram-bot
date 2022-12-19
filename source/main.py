@@ -1,7 +1,7 @@
 import threading
-from utils import *
-from constants import *
-import handlers
+from utils import mailing_daemon
+from config import BOT
+import handlers as handlers
 
 
 if __name__ == "__main__":

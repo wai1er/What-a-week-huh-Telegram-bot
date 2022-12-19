@@ -1,6 +1,12 @@
-from constants import *
-from config import *
-from utils import *
+from constants import (
+    ADMIN_CHAT_ID,
+    GACHI_STICKER,
+    POINT_LEFT,
+    POINT_RIGHT,
+    LOG_PATH,
+)
+from config import BOT, DB, logger
+import utils as utils
 
 
 @BOT.message_handler(commands=["start"])
@@ -37,13 +43,13 @@ def handle_status_command(message):
         )
     else:
 
-        logs = get_logs(LOG_PATH)
+        logs = utils.get_logs(LOG_PATH)
         BOT.send_message(user_id, logs)
 
 
 @BOT.message_handler(commands=["when"])
 def handle_when_command(message):
-    time_to_wait = time_till_meme()
+    time_to_wait = utils.time_till_meme()
     user_id = message.chat.id
     if not time_to_wait:
         msg = f"Wait for next day to get your meme"
@@ -69,4 +75,4 @@ def handle_text_message(message):
     else:
         DB.set_text_counter_to_zero(user_id)
         BOT.send_message(user_id, "Ok, i got ya.")
-        BOT.send_sticker(user_id, get_random_sticker())
+        BOT.send_sticker(user_id, utils.get_random_sticker())

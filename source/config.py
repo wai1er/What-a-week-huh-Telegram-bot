@@ -1,7 +1,7 @@
 import telebot
 import logging
 from db import BotDB
-from constants import *
+from constants import TOKEN, LOG_PATH
 
 
 BOT = telebot.TeleBot(TOKEN)
