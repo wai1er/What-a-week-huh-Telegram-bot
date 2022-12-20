@@ -25,7 +25,7 @@ def time_formatter(time):
 
 
 def get_images(day):
-    path = f"images/{day}"
+    path = f"../images/{day}"
     day_types = {}
     for _, _, files in os.walk(path):
         for filename in files:
@@ -36,7 +36,7 @@ def get_images(day):
 
 
 def get_random_image(day="wednesday"):
-    path = f"images/{day}"
+    path = f"../images/{day}"
     images = get_images(day)
     random_image = choice(list(images.values()))
     return f"{path}/{random_image}"
@@ -44,7 +44,7 @@ def get_random_image(day="wednesday"):
 
 def get_unique_image(unique_day):
     day = "unique"
-    path = f"images/{day}"
+    path = f"../images/{day}"
     unique_day_types = get_images(day)
 
     return f"{path}/{unique_day_types[unique_day]}"
@@ -89,10 +89,8 @@ def get_target_time():
         target_minutes = randint(0, len(MINUTES) - 1)
         target_seconds = target_hour * 3600 + target_minutes * 60
     else:
-        # target_hour = randint(10, 20)
-        # target_minutes = randint(0, len(MINUTES) - 1)
-        target_hour = 19
-        target_minutes = 15
+        target_hour = randint(10, 20)
+        target_minutes = randint(0, len(MINUTES) - 1)
         target_seconds = target_hour * 3600 + target_minutes * 60
 
     return target_seconds

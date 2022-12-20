@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+#Databases
+users.db
+
+#Test fyles
+test.py
+
 # Distribution / packaging
 .Python
 build/
