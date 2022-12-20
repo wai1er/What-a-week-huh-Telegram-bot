@@ -7,6 +7,7 @@ from constants import (
     DAY_SECONDS,
     MINUTES,
     BLOCKED_USER_ERROR_CODE,
+    GAME_TYPES,
 )
 from config import DB, BOT, logger
 from telebot.apihelper import ApiTelegramException
@@ -25,7 +26,7 @@ def time_formatter(time):
 
 
 def get_images(day):
-    path = f"../images/{day}"
+    path = f"images/{day}"
     day_types = {}
     for _, _, files in os.walk(path):
         for filename in files:
@@ -36,7 +37,7 @@ def get_images(day):
 
 
 def get_random_image(day="wednesday"):
-    path = f"../images/{day}"
+    path = f"images/{day}"
     images = get_images(day)
     random_image = choice(list(images.values()))
     return f"{path}/{random_image}"
@@ -44,7 +45,7 @@ def get_random_image(day="wednesday"):
 
 def get_unique_image(unique_day):
     day = "unique"
-    path = f"../images/{day}"
+    path = f"images/{day}"
     unique_day_types = get_images(day)
 
     return f"{path}/{unique_day_types[unique_day]}"
@@ -114,6 +115,24 @@ def get_time_till_next_day(waiting_time):
     return time_till_next_day
 
 
+def roll_a_dice(user_id, users_dice):
+    users_value = users_dice.dice.value
+    dice_type = users_dice.dice.emoji
+    bot_value = BOT.send_dice(user_id, dice_type).dice.value
+    if dice_type == GAME_TYPES[-1][0]:
+        BOT.send_message(user_id, "It's hearthstone. Noone wins in here.")
+    elif bot_value > users_value:
+        BOT.send_message(user_id, "Oops, i have won.")
+        DB.increase_bot_points(user_id)
+    elif users_value > bot_value:
+        BOT.send_message(user_id, "Congrats, you have won!")
+        DB.increase_user_points(user_id)
+    else:
+        BOT.send_message(user_id, "What a coincidence, it's a draw!")
+        DB.increase_bot_points(user_id)
+        DB.increase_user_points(user_id)
+
+
 def mailing(user_id):
     now = datetime.now()
     current_day, current_weekday, current_month, current_date = (
@@ -159,20 +178,18 @@ def start_mailing():
     time.sleep(waiting_time)
     logger.info("Started mailing...")
 
-    users = DB.get_users_chat_id()
-
+    users = DB.get_non_blocked_users()
     while users:
         user_id = users.pop()
-        # change the block of user to flag in database
+
         try:
             mailing(user_id)
         except ApiTelegramException as e:
             if e.error_code == BLOCKED_USER_ERROR_CODE:
-                DB.delete_user(user_id)
-                logger.info(
-                    f"User {user_id} blocked the bot and has been deleted from the database."
-                )
-            logger.info(f"Got unexpected {e} for user {user_id} skipping him")
+                DB.set_user_blocked_bot(user_id)
+                logger.info(f"User {user_id} blocked the bot.")
+            else:
+                logger.info(f"Got unexpected {e} for user {user_id} skipping him")
 
     # create config file here
     logger.info(f"Waiting for next day to choose the time: {time_till_next_day}")
