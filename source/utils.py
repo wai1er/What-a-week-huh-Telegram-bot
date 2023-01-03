@@ -8,6 +8,7 @@ from constants import (
     MINUTES,
     BLOCKED_USER_ERROR_CODE,
     GAME_TYPES,
+    ADMIN_CHAT_ID,
 )
 from config import DB, BOT, logger
 from telebot.apihelper import ApiTelegramException
@@ -26,7 +27,7 @@ def time_formatter(time):
 
 
 def get_images(day):
-    path = f"images/{day}"
+    path = f"../images/{day}"
     day_types = {}
     for _, _, files in os.walk(path):
         for filename in files:
@@ -37,7 +38,7 @@ def get_images(day):
 
 
 def get_random_image(day="wednesday"):
-    path = f"images/{day}"
+    path = f"../images/{day}"
     images = get_images(day)
     random_image = choice(list(images.values()))
     return f"{path}/{random_image}"
@@ -45,7 +46,7 @@ def get_random_image(day="wednesday"):
 
 def get_unique_image(unique_day):
     day = "unique"
-    path = f"images/{day}"
+    path = f"../images/{day}"
     unique_day_types = get_images(day)
 
     return f"{path}/{unique_day_types[unique_day]}"
@@ -177,8 +178,8 @@ def start_mailing():
     logger.info(f"Waiting time is: {time_till_meme()}, {waiting_time}")
     time.sleep(waiting_time)
     logger.info("Started mailing...")
-
     users = DB.get_non_blocked_users()
+    
     while users:
         user_id = users.pop()
 
