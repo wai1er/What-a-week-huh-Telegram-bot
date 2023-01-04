@@ -161,7 +161,7 @@ def mailing(user_id):
         BOT.send_photo(user_id, image)
         logger.info(f"Sent image to: {user_id}")
     elif current_weekday == "Wednesday":
-        image = open(get_random_image(current_weekday), "rb")
+        image = open(get_random_image(), "rb")
         BOT.send_photo(user_id, image)
         logger.info(f"Sent image to: {user_id}")
     else:
