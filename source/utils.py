@@ -14,19 +14,19 @@ from config import DB, BOT, logger
 from telebot.apihelper import ApiTelegramException
 
 
-def get_random_sticker():
+def get_random_sticker() -> int:
     sticker_id = choice(STICKER_IDS)
     return sticker_id
 
 
-def time_formatter(time):
+def time_formatter(time: int) -> int | str:
     if time < 10:
         return "0" + str(time)
     else:
         return time
 
 
-def get_images(day):
+def get_images(day: str) -> dict:
     path = f"../images/{day}"
     day_types = {}
     for _, _, files in os.walk(path):
@@ -37,14 +37,14 @@ def get_images(day):
     return day_types
 
 
-def get_random_image(day="wednesday"):
+def get_random_image(day="wednesday")-> str:
     path = f"../images/{day}"
     images = get_images(day)
     random_image = choice(list(images.values()))
     return f"{path}/{random_image}"
 
 
-def get_unique_image(unique_day):
+def get_unique_image(unique_day: str) -> str:
     day = "unique"
     path = f"../images/{day}"
     unique_day_types = get_images(day)
@@ -52,14 +52,14 @@ def get_unique_image(unique_day):
     return f"{path}/{unique_day_types[unique_day]}"
 
 
-def get_current_seconds():
+def get_current_seconds()-> int:
     now = datetime.now()
     current_seconds = now.hour * 3600 + now.minute * 60 + now.second
 
     return current_seconds
 
 
-def time_till_meme():
+def time_till_meme() -> str:
     current_seconds = get_current_seconds()
     target_seconds = get_target_time()
 
@@ -76,7 +76,7 @@ def time_till_meme():
     return f"{hours}:{minutes}:{seconds}."
 
 
-def get_logs(log_path):
+def get_logs(log_path: str) -> str:
     logs = ""
     with open(log_path) as f:
         for row in f.readlines()[-30:]:
@@ -84,7 +84,7 @@ def get_logs(log_path):
     return logs
 
 
-def get_target_time():
+def get_target_time() -> int:
     now = datetime.now()
     if now.strftime("%A") == "Monday":
         target_hour = randint(7, 10)
@@ -98,7 +98,7 @@ def get_target_time():
     return target_seconds
 
 
-def get_waiting_time(target_seconds):
+def get_waiting_time(target_seconds: int) -> int:
     current_seconds = get_current_seconds()
 
     if current_seconds < target_seconds:
@@ -109,14 +109,14 @@ def get_waiting_time(target_seconds):
     return waiting_time
 
 
-def get_time_till_next_day(waiting_time):
+def get_time_till_next_day(waiting_time: int) -> int:
     current_seconds = get_current_seconds()
     time_till_next_day = DAY_SECONDS - current_seconds - waiting_time
 
     return time_till_next_day
 
 
-def roll_a_dice(user_id, users_dice):
+def roll_a_dice(user_id: int, users_dice) -> None:
     users_value = users_dice.dice.value
     dice_type = users_dice.dice.emoji
     bot_value = BOT.send_dice(user_id, dice_type).dice.value
@@ -134,7 +134,7 @@ def roll_a_dice(user_id, users_dice):
         DB.increase_user_points(user_id)
 
 
-def mailing(user_id):
+def mailing(user_id: int) -> None:
     now = datetime.now()
     current_day, current_weekday, current_month, current_date = (
         now.day,
@@ -170,7 +170,7 @@ def mailing(user_id):
         logger.info(f"Sent image to: {user_id}")
 
 
-def start_mailing():
+def start_mailing() -> None:
     target_time = get_target_time()
     waiting_time = get_waiting_time(target_time)
     time_till_next_day = get_time_till_next_day(waiting_time)
@@ -197,6 +197,6 @@ def start_mailing():
     time.sleep(time_till_next_day)
 
 
-def mailing_daemon():
+def mailing_daemon() -> None:
     while True:
         start_mailing()
