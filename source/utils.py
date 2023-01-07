@@ -37,7 +37,7 @@ def get_images(day: str) -> dict:
     return day_types
 
 
-def get_random_image(day="wednesday")-> str:
+def get_random_image(day="wednesday") -> str:
     path = f"../images/{day}"
     images = get_images(day)
     random_image = choice(list(images.values()))
@@ -52,7 +52,7 @@ def get_unique_image(unique_day: str) -> str:
     return f"{path}/{unique_day_types[unique_day]}"
 
 
-def get_current_seconds()-> int:
+def get_current_seconds() -> int:
     now = datetime.now()
     current_seconds = now.hour * 3600 + now.minute * 60 + now.second
 
@@ -73,7 +73,7 @@ def time_till_meme() -> str:
     seconds %= 3600
     minutes = time_formatter(seconds // 60)
     seconds = time_formatter(seconds % 60)
-    return f"{hours}:{minutes}:{seconds}."
+    return f"{hours}:{minutes}:{seconds}"
 
 
 def get_logs(log_path: str) -> str:
@@ -88,11 +88,11 @@ def get_target_time() -> int:
     now = datetime.now()
     if now.strftime("%A") == "Monday":
         target_hour = randint(7, 10)
-        target_minutes = randint(0, len(MINUTES) - 1)
+        target_minutes = choice(MINUTES)
         target_seconds = target_hour * 3600 + target_minutes * 60
     else:
         target_hour = randint(10, 20)
-        target_minutes = randint(0, len(MINUTES) - 1)
+        target_minutes = choice(MINUTES)
         target_seconds = target_hour * 3600 + target_minutes * 60
 
     return target_seconds
@@ -179,7 +179,7 @@ def start_mailing() -> None:
     time.sleep(waiting_time)
     logger.info("Started mailing...")
     users = DB.get_non_blocked_users()
-    
+
     while users:
         user_id = users.pop()
 

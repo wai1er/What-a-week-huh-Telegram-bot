@@ -10,7 +10,7 @@ from config import BOT, DB, logger
 from telebot import types
 import utils as utils
 
-__commands__ = ["/start", "/game", "/gamestats", "/status", "/when", "/commands"]
+__commands__ = ["/start", "/game", "/gamestats", "/status", "/commands"]
 
 
 @BOT.message_handler(commands=["start"])
@@ -74,18 +74,6 @@ def handle_status_command(message):
 
         logs = utils.get_logs(LOG_PATH)
         BOT.send_message(user_id, logs)
-
-
-@BOT.message_handler(commands=["when"])
-def handle_when_command(message):
-    time_to_wait = utils.time_till_meme()
-    user_id = message.chat.id
-    if not time_to_wait:
-        msg = f"Wait for next day to get your meme"
-        BOT.send_message(user_id, msg)
-    else:
-        msg = f"I'll send you meme in {time_to_wait}"
-        BOT.send_message(user_id, msg)
 
 
 @BOT.message_handler(commands=["commands"])
