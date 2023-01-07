@@ -12,14 +12,14 @@ from constants import (
 )
 from config import DB, BOT, logger
 from telebot.apihelper import ApiTelegramException
-
+from typing import Union
 
 def get_random_sticker() -> int:
     sticker_id = choice(STICKER_IDS)
     return sticker_id
 
 
-def time_formatter(time: int) -> int | str:
+def time_formatter(time: int) -> Union[str, int]:
     if time < 10:
         return "0" + str(time)
     else:
