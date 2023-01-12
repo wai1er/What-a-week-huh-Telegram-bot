@@ -145,29 +145,29 @@ def mailing(user_id: int) -> None:
     if current_date == "01/02":
         image = open(get_unique_image("january_second"), "rb")
         BOT.send_photo(user_id, image)
-        logger.info(f"Sent image to: {user_id}")
+        logger.info(f"Sent {image} to: {user_id}")
     elif current_day == 15:
         image = open(get_unique_image("every_fifteen"), "rb")
         BOT.send_photo(user_id, image)
-        logger.info(f"Sent image to: {user_id}")
+        logger.info(f"Sent {image} to: {user_id}")
     elif current_month == "February":
         chance = randint(0, 100)
         if chance < 5:
             image = open(get_unique_image("february"), "rb")
             BOT.send_photo(user_id, image)
-            logger.info(f"Sent image to: {user_id}")
+            logger.info(f"Sent {image} to: {user_id}")
     elif current_weekday == "Sunday":
         image = open(get_unique_image("sunday"), "rb")
         BOT.send_photo(user_id, image)
-        logger.info(f"Sent image to: {user_id}")
+        logger.info(f"Sent {image} to: {user_id}")
     elif current_weekday == "Wednesday":
         image = open(get_random_image(), "rb")
         BOT.send_photo(user_id, image)
-        logger.info(f"Sent image to: {user_id}")
+        logger.info(f"Sent {image} to: {user_id}")
     else:
         image = open(get_random_image("other"), "rb")
         BOT.send_photo(user_id, image)
-        logger.info(f"Sent image to: {user_id}")
+        logger.info(f"Sent {image} to: {user_id}")
 
 
 def start_mailing() -> None:
